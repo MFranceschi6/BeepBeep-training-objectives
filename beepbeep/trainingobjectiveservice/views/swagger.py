@@ -3,7 +3,7 @@ from datetime import datetime
 from flakon import SwaggerBlueprint
 from flask import request, jsonify
 import requests
-from beepbeep.trainingobjectiveservice.database import db, Training_Objective
+from beepbeep.trainingobjectiveservice.database import db, Training_Objective, Last_Run
 import json
 
 
@@ -75,5 +75,7 @@ def delete_training_objectives(runner_id):
         return "", status_code
 
     db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id).delete()
+    db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id).delete()
+    db.session.commit()
     db.session.commit()
     return "", 204

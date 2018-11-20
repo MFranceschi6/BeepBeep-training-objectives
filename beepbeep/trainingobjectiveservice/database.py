@@ -16,7 +16,7 @@ class Training_Objective(db.Model):
     end_date = db.Column(db.Date)
     kilometers_to_run = db.Column(db.Float)
     runner_id = db.Column(db.Integer)
-
+    
     def to_json(self, secure=False):
         res = {}
         for attr in ('id', 'start_date', 'end_date', 'kilometers_to_run', 'runner_id'):
@@ -39,3 +39,8 @@ class Training_Objective(db.Model):
         if 'id' in schema:
             setattr(u, 'id', schema['id'])
         return u
+
+class Last_Run(db.Model):
+    __tablename__ = 'last_run'
+    runner_id = db.Column(db.Integer, primary_key=True)
+    lastRunId = db.Column(db.Integer)
