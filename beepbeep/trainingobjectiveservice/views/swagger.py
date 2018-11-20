@@ -13,12 +13,17 @@ api = SwaggerBlueprint('API', __name__, swagger_spec=YML)
 
 DATASERVICE = os.environ['DATA_SERVICE']
 
-def check_runner_id(runner_id, send_get=True):
+def check_runner_id(str_runner_id, send_get=True):
+    try:
+        runner_id = int(str_runner_id)
+    except ValueError:
+        return 400
+
     if runner_id <= 0:
         return 400
 
     if send_get:
-        status_code = requests.get(DATASERVICE + '/user/' + runner_id).status_code
+        status_code = requests.get(DATASERVICE + '/user/' + str_runner_id).status_code
         if status_code == 404:
             return 404
 
@@ -33,8 +38,8 @@ def get_training_objectives(runner_id):
     if status_code != 200:
         return "", status_code
 
-    training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id)
-    return jsonify([t_o.to_json() for t_o in training_objectives]), 200
+    training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == int(runner_id))
+    return {'training_objectives': [t_o.to_json() for t_o in training_objectives]}
 
 @api.operation('addTrainingObjective')
 def add_training_objective(runner_id):
@@ -71,4 +76,4 @@ def delete_training_objectives(runner_id):
 
     db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id).delete()
     db.session.commit()
-    return "", 200
+    return "", 204

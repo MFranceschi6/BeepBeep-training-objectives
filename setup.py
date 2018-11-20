@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from beepbeep.dataservice import __version__
+from beepbeep.trainingobjectiveservice import __version__
 
 
 setup(name='beepbeep-trainingobjective',
