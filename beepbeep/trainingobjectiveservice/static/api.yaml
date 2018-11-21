@@ -40,6 +40,7 @@ paths:
     /users/{runner_id}/training_objectives:
       parameters:
       - $ref: '#/components/parameters/RunnerID'
+
       get:
        operationId: getTrainingObjectives
        description: Get Training Objectives
@@ -87,7 +88,7 @@ paths:
                 $ref: '#/components/schemas/TrainingObjective'
         responses:
           '201':
-            description: Training Objective created. Id of the new training objective.
+            description: Training Objective created.
           '400':
             description: Bad request.
           '404':

@@ -12,8 +12,8 @@ db = SQLAlchemy()
 class Training_Objective(db.Model):
     __tablename__ = 'training_objective'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
     kilometers_to_run = db.Column(db.Float)
     runner_id = db.Column(db.Integer)
     
@@ -23,6 +23,8 @@ class Training_Objective(db.Model):
             value = getattr(self, attr)
             if isinstance(value, Decimal):
                 value = float(value)
+            elif 'date' in attr:
+                value = value.timestamp()
             res[attr] = value
         if secure:
             res['strava_token'] = self.strava_token
@@ -31,8 +33,10 @@ class Training_Objective(db.Model):
     @staticmethod
     def from_json(schema):
         u = Training_Objective()
-        for attr in ('id', 'start_date', 'end_date', 'kilometers_to_run', 'runner_id'):
-            setattr(u, attr, schema[attr])
+        
+        setattr(u, 'start_date', datetime.fromtimestamp(schema['start_date']))
+        setattr(u, 'end_date', datetime.fromtimestamp(schema['end_date']))
+        setattr(u, 'kilometers_to_run', schema['kilometers_to_run'])
 
         if 'strava_token' in schema:
             setattr(u, 'strava_token', schema['strava_token'])
