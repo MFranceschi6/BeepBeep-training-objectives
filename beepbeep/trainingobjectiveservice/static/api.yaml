@@ -34,10 +34,10 @@ components:
       required: true
       schema:
         type: integer
-      
+
 
 paths:
-    /user/{runner_id}/training_objectives/:
+    /users/{runner_id}/training_objectives:
       parameters:
       - $ref: '#/components/parameters/RunnerID'
       get:
@@ -75,9 +75,6 @@ paths:
           '5XX':
             description: Unexpected error.
 
-    /user/{runner_id}/training_objective:
-      parameters:
-      - $ref: '#/components/parameters/RunnerID'
       put:
         operationId: addTrainingObjective
         description: Add Training Objective
@@ -97,4 +94,3 @@ paths:
             description: A runner with the specified ID was not found.
           '5XX':
             description: Unexpected error.
-      
