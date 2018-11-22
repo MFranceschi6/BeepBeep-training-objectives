@@ -21,10 +21,14 @@ components:
         kilometers_to_run:
           type: number
           format: float
+        travelled_kilometers:
+          type: number
+          format: float
       required:
         - start_date
         - end_date
         - kilometers_to_run
+        - travelled_kilometers
 
   parameters:
     RunnerID:
@@ -77,7 +81,7 @@ paths:
             description: Unexpected error.
 
       post:
-        operationId: addTrainingObjectives
+        operationId: addTrainingObjective
         description: Add Training Objective
         requestBody:
           description: The training objective to create.
