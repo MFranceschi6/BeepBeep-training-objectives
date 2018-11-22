@@ -14,12 +14,13 @@ class Training_Objective(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
+    travelled_kilometers = db.Column(db.Float, default=0.0)
     kilometers_to_run = db.Column(db.Float)
     runner_id = db.Column(db.Integer)
 
     def to_json(self, secure=False):
         res = {}
-        for attr in ('id', 'start_date', 'end_date', 'kilometers_to_run', 'runner_id'):
+        for attr in ('id', 'start_date', 'end_date', 'kilometers_to_run', 'runner_id', 'travelled_kilometers'):
             value = getattr(self, attr)
             if isinstance(value, Decimal):
                 value = float(value)

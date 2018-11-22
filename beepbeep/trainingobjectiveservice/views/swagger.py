@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime,timedelta
 from flakon import SwaggerBlueprint
 from flask import request, jsonify
 import requests
@@ -28,17 +28,69 @@ def check_runner_id(runner_id, send_get=True):
 
     return 200
 
+#update_distance updates the travelled_kilometers for each training objectives: in particular fetchs the 
+# new runs, i.e. those which have an id greater than last considered id(which is stored in field "lastRunId" of Last_Run table of db)
+def update_distance(training_objectives, runner_id): 
+    lastRunId = db.session.query(Last_Run.lastRunId).filter(Last_Run.runner_id == runner_id).first() #we take the id of the last fetched run
+    dict_to = {}
+    maxRunId = -1
+    for to in training_objectives:
+        id = to['id']
+        start_date = datetime.fromtimestamp(to['start_date'])
+
+        end_date = datetime.fromtimestamp(to['end_date']) + timedelta(1)
+        travelled_kilometers = to['travelled_kilometers']
+
+
+        list_of_runs = requests.get(DATASERVICE + '/user/' + runner_id+'/runs?start-date=' + start_date + "&finish-date=" + end_date + "&from-id=" + id)#request to data service
+        status_code = list_of_runs.status_code
+        if status_code == 404:
+            return 404
+
+        if status_code != 200:
+            return 502
+
+        partial = 0
+        for run in list_of_runs:
+            partial += run['distance']/1000
+            if(run['run_id'] > maxRunId): #here we pick the max id of the runs
+                maxRunId = run['run_id']
+        travelled_kilometers += partial
+        dict_to[id] = travelled_kilometers
+    
+    for to in training_objectives:
+        to['travelled_kilometers'] = dict_to[to['id']]
+    user1 = db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id)
+    user1['lastRunId'] = maxRunId #here we update the lastRunId of the user (lastRunId is the id of the last fetched run by the user)
+    db.session.commit()
+        
+
 @api.operation('getTrainingObjectives')
 def get_training_objectives(runner_id):
     status_code = check_runner_id(runner_id)
     if status_code != 200:
         return "", status_code
 
+
+    user1 = db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id)
+    if user1.count() == 0: #if runner_id is not yet present in Last_run table, we add it
+        db_last_run = Last_Run()
+        db_last_run.runner_id = runner_id
+        db_last_run.lastRunId = -1 #dummy value
+        db.session.add(db_last_run)
+        db.session.commit()
+    
+    training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id)
+    status_code = update_distance(training_objectives, runner_id)
+    if status_code != 200:
+        return "", status_code
+   
     training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == int(runner_id))
 
     return jsonify([t_o.to_json() for t_o in training_objectives])
 
-@api.operation('addTrainingObjectives')
+
+@api.operation('addTrainingObjective')
 def add_training_objective(runner_id):
 
     training_objective = request.json
@@ -70,3 +122,4 @@ def delete_training_objectives(runner_id):
     db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id).delete()
     db.session.commit()
     return "", 204
+
