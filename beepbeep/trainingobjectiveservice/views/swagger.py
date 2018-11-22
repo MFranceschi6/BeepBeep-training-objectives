@@ -35,11 +35,10 @@ def get_training_objectives(runner_id):
         return "", status_code
 
     training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == int(runner_id))
-    print(str(training_objectives) + ' ' + str(type(training_objectives)))
-    print(str(training_objectives[0]) + ' ' + str(type(training_objectives[0])))
+
     return jsonify([t_o.to_json() for t_o in training_objectives])
 
-@api.operation('addTrainingOebjective')
+@api.operation('addTrainingObjectives')
 def add_training_objective(runner_id):
 
     training_objective = request.json
@@ -58,7 +57,6 @@ def add_training_objective(runner_id):
     db_training_objective.runner_id = runner_id
     db.session.add(db_training_objective)
     db.session.commit()
-    
 
     return "", 201
 

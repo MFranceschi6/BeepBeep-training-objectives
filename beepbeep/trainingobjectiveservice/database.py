@@ -16,7 +16,7 @@ class Training_Objective(db.Model):
     end_date = db.Column(db.DateTime)
     kilometers_to_run = db.Column(db.Float)
     runner_id = db.Column(db.Integer)
-    
+
     def to_json(self, secure=False):
         res = {}
         for attr in ('id', 'start_date', 'end_date', 'kilometers_to_run', 'runner_id'):
@@ -33,7 +33,7 @@ class Training_Objective(db.Model):
     @staticmethod
     def from_json(schema):
         u = Training_Objective()
-        
+
         setattr(u, 'start_date', datetime.fromtimestamp(schema['start_date']))
         setattr(u, 'end_date', datetime.fromtimestamp(schema['end_date']))
         setattr(u, 'kilometers_to_run', schema['kilometers_to_run'])

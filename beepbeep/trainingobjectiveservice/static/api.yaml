@@ -76,8 +76,8 @@ paths:
           '5XX':
             description: Unexpected error.
 
-      put:
-        operationId: addTrainingObjective
+      post:
+        operationId: addTrainingObjectives
         description: Add Training Objective
         requestBody:
           description: The training objective to create.
