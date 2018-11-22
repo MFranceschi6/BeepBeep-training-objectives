@@ -40,6 +40,7 @@ paths:
     /users/{runner_id}/training_objectives:
       parameters:
       - $ref: '#/components/parameters/RunnerID'
+
       get:
        operationId: getTrainingObjectives
        description: Get Training Objectives
@@ -75,8 +76,8 @@ paths:
           '5XX':
             description: Unexpected error.
 
-      put:
-        operationId: addTrainingObjective
+      post:
+        operationId: addTrainingObjectives
         description: Add Training Objective
         requestBody:
           description: The training objective to create.
@@ -87,7 +88,7 @@ paths:
                 $ref: '#/components/schemas/TrainingObjective'
         responses:
           '201':
-            description: Training Objective created. Id of the new training objective.
+            description: Training Objective created.
           '400':
             description: Bad request.
           '404':

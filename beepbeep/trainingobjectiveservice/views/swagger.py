@@ -13,17 +13,13 @@ api = SwaggerBlueprint('API', __name__, swagger_spec=YML)
 
 DATASERVICE = os.environ['DATA_SERVICE']
 
-def check_runner_id(str_runner_id, send_get=True):
-    try:
-        runner_id = int(str_runner_id)
-    except ValueError:
-        return 400
+def check_runner_id(runner_id, send_get=True):
 
-    if runner_id <= 0:
+    if int(runner_id) <= 0:
         return 400
 
     if send_get:
-        status_code = requests.get(DATASERVICE + '/user/' + str_runner_id).status_code
+        status_code = requests.get(DATASERVICE + '/user/' + runner_id).status_code
         if status_code == 404:
             return 404
 
@@ -90,32 +86,28 @@ def get_training_objectives(runner_id):
         return "", status_code
    
     training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == int(runner_id))
-    return {'training_objectives': [t_o.to_json() for t_o in training_objectives]}
+
+    return jsonify([t_o.to_json() for t_o in training_objectives])
 
 
 @api.operation('addTrainingObjective')
 def add_training_objective(runner_id):
 
     training_objective = request.json
-    try:
-        start_date = datetime.fromtimestamp(training_objective['start_date'])
-        end_date = datetime.fromtimestamp(training_objective['end_date'])
-        kilometers_to_run = training_objective['kilometers_to_run']
-    except KeyError:
-        return "", 400
 
     status_code = check_runner_id(runner_id)
-
     if status_code != 200:
         return "", status_code
 
-    db_training_objective = Training_Objective()
-    db_training_objective.start_date = start_date
-    db_training_objective.end_date = end_date
-    db_training_objective.kilometers_to_run = kilometers_to_run
+    start_date = datetime.fromtimestamp(training_objective['start_date'])
+    end_date = datetime.fromtimestamp(training_objective['end_date'])
+
+    if start_date < datetime.now() or start_date > end_date:
+        return "", 400
+
+    db_training_objective = Training_Objective.from_json(training_objective)
     db_training_objective.runner_id = runner_id
     db.session.add(db_training_objective)
-
     db.session.commit()
 
     return "", 201
