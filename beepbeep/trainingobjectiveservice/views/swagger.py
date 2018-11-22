@@ -129,9 +129,5 @@ def delete_training_objectives(runner_id):
     db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id).delete()
     db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id).delete()
     db.session.commit()
-<<<<<<< HEAD
-    return "", 200
-=======
-    db.session.commit()
     return "", 204
->>>>>>> cd54d23b4dbb85b64ca6d0695f40cea6c7b8c2b7
+
