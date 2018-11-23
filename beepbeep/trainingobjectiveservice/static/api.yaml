@@ -14,10 +14,10 @@ components:
       properties:
         start_date:
           type: integer
-          format: int64
+          format: timestamp
         end_date:
           type: integer
-          format: int64
+          format: timestamp
         kilometers_to_run:
           type: number
           format: float
@@ -28,7 +28,6 @@ components:
         - start_date
         - end_date
         - kilometers_to_run
-        - travelled_kilometers
 
   parameters:
     RunnerID:
@@ -54,12 +53,9 @@ paths:
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    users:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/TrainingObjective'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TrainingObjective'
           '400':
             description: Bad request.
           '404':

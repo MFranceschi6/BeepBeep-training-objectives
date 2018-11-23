@@ -24,8 +24,8 @@ class Training_Objective(db.Model):
             value = getattr(self, attr)
             if isinstance(value, Decimal):
                 value = float(value)
-            elif 'date' in attr:
-                value = value.timestamp()
+            elif isinstance(value, datetime):
+                value = int(value.timestamp())
             res[attr] = value
         if secure:
             res['strava_token'] = self.strava_token
