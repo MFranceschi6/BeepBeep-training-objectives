@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from flakon import SwaggerBlueprint
+from flakon.request_utils import get_request_retry, DATA_SERVICE, runs_endpoint, users_endpoint
 from flask import request, jsonify, abort
 import requests
 from beepbeep.trainingobjectiveservice.database import db, Training_Objective, Last_Run
@@ -11,8 +12,6 @@ HERE = os.path.dirname(__file__)
 YML = os.path.join(HERE, '..', 'static', 'api.yaml')
 api = SwaggerBlueprint('API', __name__, swagger_spec=YML)
 
-DATASERVICE = os.environ['DATA_SERVICE']
-
 def check_runner_id(runner_id, send_get=True):
 
     if int(runner_id) <= 0:
@@ -20,7 +19,7 @@ def check_runner_id(runner_id, send_get=True):
 
     if send_get:
         try:
-            status_code = requests.get(DATASERVICE + '/users/' + runner_id).status_code
+            status_code = get_request_retry(users_endpoint(runner_id)).status_code
         except requests.exceptions.RequestException as ex:
             abort(503, str(ex))
 
@@ -31,7 +30,7 @@ def check_runner_id(runner_id, send_get=True):
 
 #update_distance updates the travelled_kilometers for each training objectives: in particular fetchs the 
 # new runs, i.e. those which have an id greater than last considered id(which is stored in field "lastRunId" of Last_Run table of db)
-def update_distance(training_objectives, runner_id): 
+def update_distance(training_objectives, runner_id):
     lastRunId = db.session.query(Last_Run.lastRunId).filter(Last_Run.runner_id == runner_id).first().lastRunId #we take the id of the last fetched run
     dict_to = {}
     user = db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id).first()
@@ -53,7 +52,7 @@ def update_distance(training_objectives, runner_id):
 
 
         try:
-            runs_response = requests.get(DATASERVICE + '/users/' + runner_id + '/runs', params=params)#request to data service
+            runs_response = get_request_retry(runs_endpoint(runner_id), params=params)#request to data service
         except requests.exceptions.RequestException as ex:
             abort(503, str(ex))
 
