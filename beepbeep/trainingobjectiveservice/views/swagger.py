@@ -106,8 +106,11 @@ def add_training_objective(runner_id):
     start_date = datetime.fromtimestamp(training_objective['start_date'])
     end_date = datetime.fromtimestamp(training_objective['end_date'])
 
-    if start_date < datetime.now() or start_date > end_date:
-        abort(400)
+    if start_date.date() < datetime.utcnow().date():
+        abort(400, 'Start date cannot be in the past')
+
+    if start_date > end_date:
+        abort(400, 'Start date cannot be lower than end date')
 
     db_training_objective = Training_Objective.from_json(training_objective)
     db_training_objective.runner_id = runner_id
