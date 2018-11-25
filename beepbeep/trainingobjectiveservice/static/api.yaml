@@ -1,0 +1,97 @@
+openapi: 3.0.0
+info:
+  title: BeepBeep Training Service
+  description: Returns info about BeepBeep created training objectives
+  license:
+    name: APLv2
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.1.0
+
+components:
+  schemas:
+    TrainingObjective:
+      type: object
+      properties:
+        start_date:
+          type: integer
+          format: timestamp
+        end_date:
+          type: integer
+          format: timestamp
+        kilometers_to_run:
+          type: number
+          format: float
+        travelled_kilometers:
+          type: number
+          format: float
+      required:
+        - start_date
+        - end_date
+        - kilometers_to_run
+
+  parameters:
+    RunnerID:
+      in: path
+      name: runner_id
+      description: ID of Runner
+      required: true
+      schema:
+        type: integer
+
+
+paths:
+    /users/{runner_id}/training_objectives:
+      parameters:
+      - $ref: '#/components/parameters/RunnerID'
+
+      get:
+       operationId: getTrainingObjectives
+       description: Get Training Objectives
+       responses:
+          '200':
+            description: List of training objectives
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TrainingObjective'
+          '400':
+            description: Bad request.
+          '404':
+            description: A runner with the specified ID was not found.
+          '5XX':
+            description: Unexpected error.
+    
+      delete:
+        operationId: deleteTrainingObjectives
+        description: delete all training objectives of a runner.
+        responses:
+          '204':
+            description: Training objectives was deleted successfully.
+          '400':
+            description: Bad request.
+          '404':
+            description: A runner with the specified ID was not found.
+          '5XX':
+            description: Unexpected error.
+
+      post:
+        operationId: addTrainingObjective
+        description: Add Training Objective
+        requestBody:
+          description: The training objective to create.
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingObjective'
+        responses:
+          '201':
+            description: Training Objective created.
+          '400':
+            description: Bad request.
+          '404':
+            description: A runner with the specified ID was not found.
+          '5XX':
+            description: Unexpected error.
