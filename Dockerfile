@@ -8,5 +8,4 @@ ADD . /app
 RUN python setup.py develop
 RUN mkdir -p src/flakon/flakon/static
 RUN mv docs/ src/flakon/flakon/static/doc/
-RUN tree -d .
 CMD ["beepbeep-trainingobjectiveservice"]
