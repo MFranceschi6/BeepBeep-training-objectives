@@ -18,6 +18,9 @@ def check_runner_id(runner_id, send_get=True):
         abort(400, 'Invalid runner_id')
 
     if send_get:
+        if db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id).count() != 0:
+            return
+
         try:
             response = get_request_retry(users_endpoint(runner_id))
             status_code = response.status_code
@@ -27,6 +30,11 @@ def check_runner_id(runner_id, send_get=True):
 
         if status_code != 200:
             abort(status_code, response.json().get('message'))
+
+        db_last_run = Last_Run()
+        db_last_run.runner_id = runner_id
+        db.session.add(db_last_run)
+        db.session.commit()
 
 
 #update_distance updates the travelled_kilometers for each training objectives: in particular fetchs the 
@@ -83,13 +91,6 @@ def update_distance(training_objectives, runner_id):
 def get_training_objectives(runner_id):
     check_runner_id(runner_id)
 
-    user1 = db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id)
-    if user1.count() == 0: #if runner_id is not yet present in Last_run table, we add it
-        db_last_run = Last_Run()
-        db_last_run.runner_id = runner_id
-        db.session.add(db_last_run)
-        db.session.commit()
-
     training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id)
     update_distance(training_objectives, runner_id)
 
@@ -99,7 +100,6 @@ def get_training_objectives(runner_id):
 
 @api.operation('addTrainingObjective')
 def add_training_objective(runner_id):
-
     training_objective = request.json
 
     check_runner_id(runner_id)
