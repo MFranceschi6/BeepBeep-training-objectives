@@ -15,17 +15,18 @@ api = SwaggerBlueprint('API', __name__, swagger_spec=YML)
 def check_runner_id(runner_id, send_get=True):
 
     if int(runner_id) <= 0:
-        abort(400)
+        abort(400, 'Invalid runner_id')
 
     if send_get:
         try:
-            status_code = get_request_retry(users_endpoint(runner_id)).status_code
+            response = get_request_retry(users_endpoint(runner_id))
+            status_code = response.status_code
         except requests.exceptions.RequestException as ex:
             abort(503, str(ex))
 
 
         if status_code != 200:
-            abort(status_code)
+            abort(status_code, response.json.get('message'))
 
 
 #update_distance updates the travelled_kilometers for each training objectives: in particular fetchs the 
@@ -60,7 +61,7 @@ def update_distance(training_objectives, runner_id):
         status_code = runs_response.status_code
 
         if status_code != 200:
-            abort(status_code)
+            abort(status_code, runs_response.json.get('message'))
 
 
         partial_sum = 0
@@ -92,7 +93,7 @@ def get_training_objectives(runner_id):
     training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id)
     update_distance(training_objectives, runner_id)
 
-    training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == int(runner_id))
+    training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id)
     return jsonify([t_o.to_json() for t_o in training_objectives])
 
 

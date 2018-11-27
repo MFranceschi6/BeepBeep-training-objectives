@@ -5,7 +5,7 @@ info:
   license:
     name: APLv2
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.1.0
+  version: 0.1.1
 
 components:
   schemas:
@@ -15,19 +15,32 @@ components:
         start_date:
           type: integer
           format: timestamp
+          description: Starting date of the training objective.
         end_date:
           type: integer
           format: timestamp
+          description: Ending date of the training objective.
         kilometers_to_run:
           type: number
           format: float
-        travelled_kilometers:
-          type: number
-          format: float
+          description: Kilomenters to travel to reach the training objective.
       required:
         - start_date
         - end_date
         - kilometers_to_run
+    
+    TrainingObjectiveWithTravelled:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            travelled_kilometers:
+              type: number
+              format: float
+              description: Kilomenters travelled for the training objective.
+          required:
+            - travelled_kilometers
+        - $ref: '#/components/schemas/TrainingObjective'
 
   parameters:
     RunnerID:
@@ -55,7 +68,7 @@ paths:
                 schema:
                   type: array
                   items:
-                    $ref: '#/components/schemas/TrainingObjective'
+                    $ref: '#/components/schemas/TrainingObjectiveWithTravelled'
           '400':
             description: Bad request.
           '404':
