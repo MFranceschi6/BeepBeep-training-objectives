@@ -4,6 +4,7 @@ from flakon import SwaggerBlueprint
 from flakon.request_utils import get_request_retry, runs_endpoint, users_endpoint
 from flask import request, jsonify, abort
 import requests
+from decimal import Decimal
 from beepbeep.trainingobjectiveservice.database import db, Training_Objective, Last_Run
 import json
 
@@ -103,6 +104,10 @@ def add_training_objective(runner_id):
     training_objective = request.json
 
     check_runner_id(runner_id)
+
+    # if kilometers_to_run have more than 3 decimal places
+    if abs(Decimal(str(training_objective['kilometers_to_run'])).as_tuple().exponent) > 3:
+        abort(400, 'Kilometers to run cannot have more than three decimal places.')
 
     start_date = datetime.fromtimestamp(training_objective['start_date'])
     end_date = datetime.fromtimestamp(training_objective['end_date'])
