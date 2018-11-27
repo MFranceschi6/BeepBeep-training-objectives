@@ -61,7 +61,7 @@ def update_distance(training_objectives, runner_id):
         status_code = runs_response.status_code
 
         if status_code != 200:
-            abort(status_code, response.json().get('message'))
+            abort(status_code, runs_response.json().get('message'))
 
 
         partial_sum = 0
