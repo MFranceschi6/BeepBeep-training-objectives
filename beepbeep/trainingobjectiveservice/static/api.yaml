@@ -23,7 +23,8 @@ components:
         kilometers_to_run:
           type: number
           format: float
-          description: Kilomenters to travel to reach the training objective.
+          minimum: 0.001
+          description: Kilomenters to travel to reach the training objective. It must be at least one meter and with at most three decimal places.
       required:
         - start_date
         - end_date
