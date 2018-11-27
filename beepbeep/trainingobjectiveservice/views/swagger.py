@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from flakon import SwaggerBlueprint
-from flakon.request_utils import get_request_retry, DATA_SERVICE, runs_endpoint, users_endpoint
+from flakon.request_utils import get_request_retry, runs_endpoint, users_endpoint
 from flask import request, jsonify, abort
 import requests
 from beepbeep.trainingobjectiveservice.database import db, Training_Objective, Last_Run
@@ -26,7 +26,7 @@ def check_runner_id(runner_id, send_get=True):
 
 
         if status_code != 200:
-            abort(status_code, response.json.get('message'))
+            abort(status_code, response.json().get('message'))
 
 
 #update_distance updates the travelled_kilometers for each training objectives: in particular fetchs the 
@@ -61,7 +61,7 @@ def update_distance(training_objectives, runner_id):
         status_code = runs_response.status_code
 
         if status_code != 200:
-            abort(status_code, runs_response.json.get('message'))
+            abort(status_code, response.json().get('message'))
 
 
         partial_sum = 0
