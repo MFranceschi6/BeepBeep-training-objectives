@@ -5,3 +5,4 @@ cryptography
 sqlalchemy
 flask_sqlalchemy
 chaussette
+flask_cors
