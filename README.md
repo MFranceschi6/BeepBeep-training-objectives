@@ -1,4 +1,4 @@
-# BeepBeep-training-objectives :runner:
+# BeepBeep-training-objectives :runner: [![Build Status](https://travis-ci.org/MFranceschi6/BeepBeep-training-objectives.svg?branch=master)](https://travis-ci.org/MFranceschi6/BeepBeep-training-objectives) [![Coverage Status](https://coveralls.io/repos/github/MFranceschi6/BeepBeep-training-objectives/badge.svg?branch=master)](https://coveralls.io/github/MFranceschi6/BeepBeep-training-objectives?branch=master)
 
 ## API Documentation :trollface:
 
