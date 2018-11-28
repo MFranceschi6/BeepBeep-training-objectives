@@ -1,0 +1,4 @@
+[run]
+omit =
+	beepbeep/trainingobjectiveservice/tests/*
+ 	beepbeep/trainingobjectiveservice/run.py

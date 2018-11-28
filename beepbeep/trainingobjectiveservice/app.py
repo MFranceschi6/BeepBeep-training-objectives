@@ -36,14 +36,14 @@ def create_app(settings=None):
     return app
 
 
-def _400(desc):
+def _400(desc):  # pragma: no cover
     exc = HTTPException()
     exc.code = 400
     exc.description = desc
     return error_handling(exc)
 
 
-def authenticate(app, request):
+def authenticate(app, request):  # pragma: no cover
     key = request.headers.get('Authorization')
     if key is None:
         return abort(401)
