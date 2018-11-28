@@ -4,6 +4,7 @@ from flakon import create_app as _create_app
 from flakon.util import error_handling
 from flask import request, abort, g
 from flask_cors import CORS
+from pathlib import Path
 
 import jwt
 
@@ -12,7 +13,7 @@ from .database import db
 
 
 _HERE = os.path.dirname(__file__)
-os.environ['TESTDIR'] = os.path.join(_HERE, 'tests')
+os.environ['TESTDIR'] = os.path.join(Path(_HERE).parents[1], 'tests')
 _SETTINGS = os.path.join(_HERE, 'settings.ini')
 
 
