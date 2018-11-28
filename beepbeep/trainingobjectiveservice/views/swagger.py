@@ -1,9 +1,10 @@
 import os
 from datetime import datetime, timedelta
 from flakon import SwaggerBlueprint
-from flakon.request_utils import get_request_retry, DATA_SERVICE, runs_endpoint, users_endpoint
+from flakon.request_utils import get_request_retry, runs_endpoint, users_endpoint
 from flask import request, jsonify, abort
 import requests
+from decimal import Decimal
 from beepbeep.trainingobjectiveservice.database import db, Training_Objective, Last_Run
 import json
 
@@ -15,17 +16,26 @@ api = SwaggerBlueprint('API', __name__, swagger_spec=YML)
 def check_runner_id(runner_id, send_get=True):
 
     if int(runner_id) <= 0:
-        abort(400)
+        abort(400, 'Invalid runner_id')
 
     if send_get:
+        if db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id).count() != 0:
+            return
+
         try:
-            status_code = get_request_retry(users_endpoint(runner_id)).status_code
+            response = get_request_retry(users_endpoint(runner_id))
+            status_code = response.status_code
         except requests.exceptions.RequestException as ex:
             abort(503, str(ex))
 
 
         if status_code != 200:
-            abort(status_code)
+            abort(status_code, response.json().get('message'))
+
+        db_last_run = Last_Run()
+        db_last_run.runner_id = runner_id
+        db.session.add(db_last_run)
+        db.session.commit()
 
 
 #update_distance updates the travelled_kilometers for each training objectives: in particular fetchs the 
@@ -60,7 +70,7 @@ def update_distance(training_objectives, runner_id):
         status_code = runs_response.status_code
 
         if status_code != 200:
-            abort(status_code)
+            abort(status_code, runs_response.json().get('message'))
 
 
         partial_sum = 0
@@ -82,26 +92,22 @@ def update_distance(training_objectives, runner_id):
 def get_training_objectives(runner_id):
     check_runner_id(runner_id)
 
-    user1 = db.session.query(Last_Run).filter(Last_Run.runner_id == runner_id)
-    if user1.count() == 0: #if runner_id is not yet present in Last_run table, we add it
-        db_last_run = Last_Run()
-        db_last_run.runner_id = runner_id
-        db.session.add(db_last_run)
-        db.session.commit()
-
     training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id)
     update_distance(training_objectives, runner_id)
 
-    training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == int(runner_id))
+    training_objectives = db.session.query(Training_Objective).filter(Training_Objective.runner_id == runner_id)
     return jsonify([t_o.to_json() for t_o in training_objectives])
 
 
 @api.operation('addTrainingObjective')
 def add_training_objective(runner_id):
-
     training_objective = request.json
 
     check_runner_id(runner_id)
+
+    # if kilometers_to_run have more than 3 decimal places
+    if abs(Decimal(str(training_objective['kilometers_to_run'])).as_tuple().exponent) > 3:
+        abort(400, 'Kilometers to run cannot have more than three decimal places.')
 
     start_date = datetime.fromtimestamp(training_objective['start_date'])
     end_date = datetime.fromtimestamp(training_objective['end_date'])
