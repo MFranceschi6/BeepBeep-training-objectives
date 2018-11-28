@@ -34,9 +34,9 @@ class TestViews(unittest.TestCase):
         self.token = create_token(_TOKEN).decode('ascii')
         self.headers = {'Authorization': 'Bearer ' + self.token}
 
-    def test_one(self):
-        resp = self.app.get('/', headers=self.headers)
-        self.assertEqual(resp.status_code, 200)
+    #def test_one(self):
+    #    resp = self.app.get('/', headers=self.headers)
+    #    self.assertEqual(resp.status_code, 200)
 
 @pytest.fixture
 def app():
