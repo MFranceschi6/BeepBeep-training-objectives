@@ -13,12 +13,12 @@ components:
       type: object
       properties:
         start_date:
-          type: integer
-          format: timestamp
+          type: number
+          format: float
           description: Starting date of the training objective.
         end_date:
-          type: integer
-          format: timestamp
+          type: number
+          format: float
           description: Ending date of the training objective.
         kilometers_to_run:
           type: number
