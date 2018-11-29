@@ -34,10 +34,6 @@ class TestViews(unittest.TestCase):
         self.token = create_token(_TOKEN).decode('ascii')
         self.headers = {'Authorization': 'Bearer ' + self.token}
 
-    def test_one(self):
-        resp = self.app.get('/', headers=self.headers)
-        self.assertEqual(resp.status_code, 200)
-
 @pytest.fixture
 def app():
     app = create_app()
@@ -95,12 +91,14 @@ def test_get(client, db_instance):
 #Test for the t_o of a user that doesn't exist
     with mock.patch('beepbeep.trainingobjectiveservice.views.swagger.get_request_retry') as mocked:
         mocked.return_value.status_code = 404
+        mocked.return_value.json.return_value.get.return_value = 'error'
         response = client.get('/users/2/training_objectives')
         assert response.status_code == 404
 
 #Test when dataservice is not reachable
     with mock.patch('beepbeep.trainingobjectiveservice.views.swagger.get_request_retry') as mocked:
         mocked.return_value.status_code = 503
+        mocked.return_value.json.return_value.get.return_value = 'error'
         response = client.get('/users/2/training_objectives')
         assert response.status_code == 503
 
@@ -262,12 +260,13 @@ def test_add(client, db_instance):
 #Test add a t_o from unregistered user
     with mock.patch('beepbeep.trainingobjectiveservice.views.swagger.get_request_retry') as mocked:
         mocked.return_value.status_code = 404
+        mocked.return_value.json.return_value.get.return_value = 'error'
         response = client.post('/users/1/training_objectives', json={
                         'start_date': _TODAY,
                         'end_date': _TODAY,
                         'kilometers_to_run': 1
                     })
-    assert response.status_code == 404
+        assert response.status_code == 404
     assert db_instance.session.query(Training_Objective).count() == 0
 
 #Test add a t_o
@@ -291,14 +290,14 @@ def test_add(client, db_instance):
 
 
 #Test add a t_o with a negative number of km
-    '''response = mock_add_trainig_objective(client, db_instance, kilometers_to_run=-1)
+    response = mock_add_trainig_objective(client, db_instance, kilometers_to_run=-1)
     assert response.status_code == 400
-    assert db_instance.session.query(Training_Objective).count() == 0'''
+    assert db_instance.session.query(Training_Objective).count() == 0
 
 #Test add a t_0 with 0 km
-    '''response = mock_add_trainig_objective(client, db_instance, kilometers_to_run=0)
+    response = mock_add_trainig_objective(client, db_instance, kilometers_to_run=0)
     assert response.status_code == 400
-    assert db_instance.session.query(Training_Objective).count() == 0'''
+    assert db_instance.session.query(Training_Objective).count() == 0
 
 #Test add a t_o that starts in the past
     t = correct_format_date(year = 2015)
@@ -314,9 +313,6 @@ def test_add(client, db_instance):
     assert db_instance.session.query(Training_Objective).count() == 0
 
 def test_check_runner(client, db_instance):
-    exception = requests.exceptions.RequestException()
-    exception.code = 503
-    exception.data = {'ciao': 'ciao'}
     try:
         check_runner_id(-1)
     except HTTPException as e:
@@ -333,7 +329,3 @@ def test_check_runner(client, db_instance):
             response = check_runner_id(1)
         except HTTPException as e:
             assert e.code == 503
-
-
-
-
